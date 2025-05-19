@@ -1,5 +1,5 @@
 import unittest
-from src.moves import compress, merge, move_left, move_right, move_up, move_down
+from src.common.moves import compress, merge, move_left, move_right, move_up, move_down
 
 
 class Test2048Moves(unittest.TestCase):
@@ -18,6 +18,22 @@ class Test2048Moves(unittest.TestCase):
         self.assertEqual(merge([4, 4, 4, 4]), [8, 0, 8, 0])
         self.assertEqual(merge([2, 4, 8, 16]), [2, 4, 8, 16])
         self.assertEqual(merge([0, 0, 0, 0]), [0, 0, 0, 0])
+
+    # --- Transpose tests ---
+    def test_transpose(self):
+        board = [
+            [2, 2, 0, 0],
+            [4, 0, 4, 0],
+            [2, 2, 2, 2],
+            [0, 0, 0, 0]
+        ]
+        expected = [
+            [2, 4, 2, 0],
+            [2, 0, 2, 0],
+            [0, 4, 2, 0],
+            [0, 0, 2, 0]
+        ]
+        self.assertEqual(transpose(board), expected)
 
     # --- Move left ---
     def test_move_left(self):
@@ -82,7 +98,6 @@ class Test2048Moves(unittest.TestCase):
             [4, 8, 4, 8]
         ]
         self.assertEqual(move_down(board), expected)
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,6 @@
 def compress(row):
     """Slide all non-zero tiles to the left."""
-    new_row = [num for num in row if num != 0]
+    new_row = [i for i in row if i != 0]
     new_row += [0] * (len(row) - len(new_row))
     return new_row
 
@@ -28,17 +28,12 @@ def move_left(board):
     return [compress_and_merge_row(row) for row in board]
 
 def move_right(board):
-    reversed_board = reverse(board)
-    moved = [compress_and_merge_row(row) for row in reversed_board]
-    return reverse(moved)
+    reversed_board = [row[::-1] for row in board]
+    moved = move_left(reversed_board)
+    return [row[::-1] for row in moved]
 
 def move_up(board):
-    transposed = transpose(board)
-    moved = [compress_and_merge_row(row) for row in transposed]
-    return transpose(moved)
+    return transpose(move_left(transpose(board)))
 
 def move_down(board):
-    transposed = transpose(board)
-    reversed_transposed = reverse(transposed)
-    moved = [compress_and_merge_row(row) for row in reversed_transposed]
-    return transpose(reverse(moved))
+    return transpose(move_right(transpose(board)))

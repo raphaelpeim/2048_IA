@@ -1,7 +1,7 @@
 import keyboard
 
-from src.constants import BOARD_SIZE
-from src.direction import Direction
+from src.common.constants import BOARD_SIZE
+from src.common.direction import Direction
 
 
 # Board
@@ -13,7 +13,11 @@ def print_board(board):
         print("-" * (BOARD_SIZE * 6 + 1))
 
 def is_same_board(board1, board2):
-    return all(board1[i][j] == board2[i][j] for i in range(BOARD_SIZE) for j in range(BOARD_SIZE))
+    return all(
+        board1[row][column] == board2[row][column]
+        for row in range(len(board1))
+        for column in range(len(board1[0]))
+    )
 
 # Keyboard
 def get_input():

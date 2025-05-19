@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-from src.constants import BOARD_SIZE
+from src.common.constants import BOARD_SIZE, TARGET_TILE
 
 
 class Game2048:
@@ -20,7 +20,7 @@ class Game2048:
             self.board[i][j] = random.choices([2, 4], weights=[0.9, 0.1])[0]  # Optional: bias toward 2
 
     def is_won(self):
-        return any(cell == 2048 for row in self.board for cell in row)
+        return any(cell == TARGET_TILE for row in self.board for cell in row)
 
     def can_move(self):
         board = self.board
