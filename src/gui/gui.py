@@ -1,11 +1,10 @@
 import tkinter as tk
 
-from src.core.ai import get_best_move
-from src.common.direction import Direction
+from src.ai.q_learning import QLearningAgent
+from src.core.bot import get_best_move
 from src.core.game import Game2048
-from src.common.moves import move_up, move_down, move_left, move_right
-from src.common.utils import is_same_board
-from src.common.constants import BOARD_SIZE, COLORS
+from src.common.utils import is_same_board, get_valid_moves, apply_move
+from src.common.constants import BOARD_SIZE, COLORS, KEYBOARD_ARROW_DIRECTIONS
 
 
 class GameGUI:
@@ -25,22 +24,20 @@ class GameGUI:
         self.update_board()
         self.root.bind("<Key>", self.key_handler)
         self.ai_enabled = False
+        self.bot_enabled = False
         self.root.bind("a", self.toggle_ai)
+        self.root.bind("b", self.toggle_bot)
+        self.q_agent = QLearningAgent()
+        try:
+            self.q_agent.load("q_table.pkl")
+        except FileNotFoundError:
+            print("Trained Q-table not found.")
 
     def key_handler(self, event):
         key = event.keysym
         original = [row[:] for row in self.game.board]
 
-        if key == Direction.UP:
-            self.game.board = move_up(self.game.board)
-        elif key == Direction.DOWN:
-            self.game.board = move_down(self.game.board)
-        elif key == Direction.LEFT:
-            self.game.board = move_left(self.game.board)
-        elif key == Direction.RIGHT:
-            self.game.board = move_right(self.game.board)
-        else:
-            return
+        self.game.board = apply_move(self.game.board, KEYBOARD_ARROW_DIRECTIONS[key])
 
         if not is_same_board(self.game.board, original):
             self.game.add_tile()
@@ -65,26 +62,27 @@ class GameGUI:
         tk.Label(top, text=msg, font=("Helvetica", 20)).pack(padx=20, pady=20)
         tk.Button(top, text="Close", command=self.root.quit).pack(pady=10)
 
-    def toggle_ai(self, event=None):
+    def toggle_ai(self):
         self.ai_enabled = not self.ai_enabled
         if self.ai_enabled:
             self.root.after(100, self.ai_loop)
+
+    def toggle_bot(self):
+        self.bot_enabled = not self.bot_enabled
+        if self.bot_enabled:
+            self.root.after(100, self.bot_loop)
 
     def ai_loop(self):
         if not self.ai_enabled:
             return
 
-        move = get_best_move(self.game.board)
+        state = self.q_agent.get_state(self.game.board)
+        valid = get_valid_moves(self.game.board)
+        move = self.q_agent.choose_action(state, valid)
+
         original = [row[:] for row in self.game.board]
 
-        if move == Direction.UP:
-            self.game.board = move_up(self.game.board)
-        elif move == Direction.DOWN:
-            self.game.board = move_down(self.game.board)
-        elif move == Direction.LEFT:
-            self.game.board = move_left(self.game.board)
-        elif move == Direction.RIGHT:
-            self.game.board = move_right(self.game.board)
+        self.game.board = apply_move(self.game.board, move)
 
         if not is_same_board(self.game.board, original):
             self.game.add_tile()
@@ -100,6 +98,29 @@ class GameGUI:
         else:
             self.root.after(150, self.ai_loop)
 
+    def bot_loop(self):
+        if not self.bot_enabled:
+            return
+
+        move = get_best_move(self.game.board)
+
+        original = [row[:] for row in self.game.board]
+
+        self.game.board = apply_move(self.game.board, move)
+
+        if not is_same_board(self.game.board, original):
+            self.game.add_tile()
+
+        self.update_board()
+
+        if self.game.is_won():
+            self.show_message("Bot wins!")
+            self.bot_enabled = False
+        elif not self.game.can_move():
+            self.show_message("Bot lost!")
+            self.bot_enabled = False
+        else:
+            self.root.after(150, self.bot_loop())
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -1,7 +1,9 @@
+import copy
 import keyboard
 
-from src.common.constants import BOARD_SIZE
+from src.common.constants import BOARD_SIZE, DIRECTIONS, MOVE_FUNCTIONS
 from src.common.direction import Direction
+from src.common.moves import move_up, move_down, move_left, move_right
 
 
 # Board
@@ -36,3 +38,25 @@ def get_input():
             elif event.name == 'esc':
                 return 'quit'
 
+# Moves
+def get_valid_moves(board):
+    valid = []
+    for direction in DIRECTIONS:
+        moved = MOVE_FUNCTIONS[direction](copy.deepcopy(board))
+        if not is_same_board(moved, board):
+            valid.append(direction)
+    return valid
+
+def apply_move(board, move):
+        new_board = copy.deepcopy(board)
+
+        if move == Direction.UP:
+            new_board = move_up(board)
+        elif move == Direction.DOWN:
+            new_board = move_down(board)
+        elif move == Direction.LEFT:
+            new_board = move_left(board)
+        elif move == Direction.RIGHT:
+            new_board = move_right(board)
+
+        return new_board

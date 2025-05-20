@@ -9,6 +9,13 @@ TARGET_TILE = 2048
 # Directions and corresponding move functions
 DIRECTIONS = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 
+KEYBOARD_ARROW_DIRECTIONS = {
+    'Up': Direction.UP,
+    'Down': Direction.DOWN,
+    'Left': Direction.LEFT,
+    'Right': Direction.RIGHT
+}
+
 MOVE_FUNCTIONS = {
     Direction.UP: move_up,
     Direction.DOWN: move_down,

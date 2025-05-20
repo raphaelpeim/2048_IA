@@ -1,5 +1,5 @@
 import unittest
-from src.common.moves import compress, merge, move_left, move_right, move_up, move_down
+from src.common.moves import compress, merge, move_left, move_right, move_up, move_down, transpose
 
 
 class Test2048Moves(unittest.TestCase):

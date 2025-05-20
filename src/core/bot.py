@@ -2,16 +2,8 @@ import copy
 import random
 
 from src.common.constants import DIRECTIONS, MOVE_FUNCTIONS
-from src.common.utils import is_same_board
+from src.common.utils import get_valid_moves
 
-
-def get_valid_moves(board):
-    valid = []
-    for direction in DIRECTIONS:
-        moved = MOVE_FUNCTIONS[direction](copy.deepcopy(board))
-        if not is_same_board(moved, board):
-            valid.append(direction)
-    return valid
 
 def evaluate(board):
     # Simple heuristic: prefer boards with more empty tiles
