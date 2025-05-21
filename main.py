@@ -1,9 +1,6 @@
-import tkinter as tk
-
-from src.gui.gui import GameGUI
-
+from src.ai.q_learning import QLearningAgent
+from src.common.utils import train
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    gui = GameGUI(root)
-    root.mainloop()
+    agent = QLearningAgent()
+    train(agent, episodes=10000)

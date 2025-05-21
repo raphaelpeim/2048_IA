@@ -1,55 +1,33 @@
-import pickle
 import random
-from src.common.constants import MOVE_FUNCTIONS
-from src.common.utils import get_valid_moves
-from src.core.game import Game2048
+import pickle
 
+from src.common.utils import is_same_board
+from src.common.constants import DIRECTIONS, MOVE_FUNCTIONS
+from src.core.game import Game2048
+import matplotlib.pyplot as plt
 
 class QLearningAgent:
-    def __init__(self, alpha=0.1, gamma=0.9, epsilon=0.1):
+    def __init__(self, alpha=0.1, gamma=0.9, epsilon=1.0, decay=0.995, min_epsilon=0.01):
         self.q_table = {}
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
+        self.decay = decay
+        self.min_epsilon = min_epsilon
 
-    def get_state(self, board):
-        return tuple(tuple(row) for row in board)
+    def get_q(self, state, action):
+        return self.q_table.get((state, action), 0.0)
 
-    def choose_action(self, state, valid_actions):
+    def update(self, state, action, reward, next_state, next_valid_actions):
+        max_q = max([self.get_q(next_state, a) for a in next_valid_actions], default=0)
+        current_q = self.get_q(state, action)
+        self.q_table[(state, action)] = current_q + self.alpha * (reward + self.gamma * max_q - current_q)
+
+    def get_action(self, state, valid_actions):
         if random.random() < self.epsilon:
             return random.choice(valid_actions)
-        q_vals = [self.q_table.get((state, a), 0) for a in valid_actions]
-        max_q = max(q_vals)
-        return random.choice([a for a, q in zip(valid_actions, q_vals) if q == max_q])
+        qs = {a: self.get_q(state, a) for a in valid_actions}
+        return max(qs, key=qs.get)
 
-    def learn(self, s, a, r, s_next, valid_actions_next):
-        old_q = self.q_table.get((s, a), 0)
-        future_q = max([self.q_table.get((s_next, a2), 0) for a2 in valid_actions_next], default=0)
-        new_q = old_q + self.alpha * (r + self.gamma * future_q - old_q)
-        self.q_table[(s, a)] = new_q
-
-    def train(self, episodes=10000):
-        for episode in range(episodes):
-            game = Game2048()
-            while game.can_move():
-                s = self.get_state(game.board)
-                valid = get_valid_moves(game.board)
-                a = self.choose_action(s, valid)
-                new_board = MOVE_FUNCTIONS[a](game.board)
-                reward = self.calculate_reward(game.board, new_board)
-                game.board = new_board
-                game.add_tile()
-                s_next = self.get_state(game.board)
-                valid_next = get_valid_moves(game.board)
-                self.learn(s, a, reward, s_next, valid_next)
-
-    def calculate_reward(self, old_board, new_board):
-        return sum(sum(new_row) for new_row in new_board) - sum(sum(row) for row in old_board)
-
-    def save(self, path):
-        with open(path, 'wb') as f:
-            pickle.dump(self.q_table, f)
-
-    def load(self, path):
-        with open(path, 'rb') as f:
-            self.q_table = pickle.load(f)
+    def decay_epsilon(self):
+        self.epsilon = max(self.min_epsilon, self.epsilon * self.decay)
