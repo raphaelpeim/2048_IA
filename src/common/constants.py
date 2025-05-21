@@ -1,10 +1,12 @@
-from src.common.direction import Direction
+from src.common.enums import Direction
 from src.common.moves import move_up, move_down, move_left, move_right
 
 # Game configuration
 BOARD_SIZE = 4
 
 TARGET_TILE = 2048
+
+QTABLE_PATH = "assets/qtable.pkl"
 
 # Directions and corresponding move functions
 DIRECTIONS = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
@@ -23,7 +25,7 @@ MOVE_FUNCTIONS = {
     Direction.RIGHT: move_right
 }
 
-# Visualization colors
+# Visualization
 COLORS = {
     0: "#cdc1b4",
     2: "#eee4da",

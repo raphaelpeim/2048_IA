@@ -1,11 +1,9 @@
 import tkinter as tk
 
 from src.ai.q_learning import QLearningAgent
-from src.common.direction import Direction
 from src.core.bot import get_best_move
 from src.core.game import Game2048
-from src.common.moves import move_up, move_down, move_left, move_right
-from src.common.utils import is_same_board, simulate_move, get_valid_moves
+from src.common.utils import is_same_board, simulate_move, get_valid_moves, serialize_board
 from src.common.constants import BOARD_SIZE, COLORS, KEYBOARD_ARROW_DIRECTIONS
 
 
@@ -34,10 +32,6 @@ class GameGUI:
         self.ai_enabled = False
         self.root.bind("a", self.toggle_ai)
         self.q_agent = QLearningAgent()
-        try:
-            self.q_agent.load("q_table.pkl")
-        except FileNotFoundError:
-            print("Trained Q-table not found.")
 
     def key_handler(self, event):
         if self.ai_enabled or self.bot_enabled:
@@ -87,9 +81,9 @@ class GameGUI:
         if not self.ai_enabled:
             return
 
-        state = self.q_agent.get_state(self.game.board)
+        state = serialize_board(self.game.board)
         valid = get_valid_moves(self.game.board)
-        move = self.q_agent.choose_action(state, valid)
+        move = self.q_agent.get_action(state, valid)
 
         original = [row[:] for row in self.game.board]
 

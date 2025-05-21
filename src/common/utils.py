@@ -1,9 +1,10 @@
+import pickle
+
 import keyboard
 import matplotlib.pyplot as plt
 
-from src.common.constants import BOARD_SIZE, DIRECTIONS, MOVE_FUNCTIONS
-from src.common.direction import Direction
-from src.common.moves import move_up, move_down, move_left, move_right
+from src.common.constants import BOARD_SIZE, DIRECTIONS, MOVE_FUNCTIONS, QTABLE_PATH
+from src.common.enums import Direction
 from src.core.game import Game2048
 
 
@@ -26,8 +27,19 @@ def serialize_board(board):
     return tuple(cell for row in board for cell in row)
 
 def compute_reward(old_board, new_board):
-    score_gain = sum(sum(new - old for new, old in zip(nr, orow) if new > old) for nr, orow in zip(new_board, old_board))
+    # The new board have to be different from the old one
+    if is_same_board(old_board, new_board):
+        return -5
+
+    # The tile merging is encourage, especially high values
+    score_gain = sum(
+        sum(new_cell - old_cell for new_cell, old_cell in zip(new_row, old_row) if new_cell > old_cell)
+        for new_row, old_row in zip(new_board, old_board)
+    )
+
+    # Reducing the number of non-zero cells is encouraged
     empty_tiles = sum(cell == 0 for row in new_board for cell in row)
+
     return score_gain + empty_tiles * 0.1
 
 # Keyboard
@@ -83,8 +95,6 @@ def visualize_training(scores, max_tiles):
 
 # AI
 def train(agent, episodes=1000):
-    # TODO analyze
-
     scores = []
     max_tiles = []
 
@@ -107,8 +117,7 @@ def train(agent, episodes=1000):
             agent.update(state, action, reward, next_state, next_moves)
             game.board = new_board
             state = next_state
-
-            print_board(game.board)
+            game.add_tile()
 
         scores.append(total_score)
         max_tiles.append(max(cell for row in game.board for cell in row))
@@ -117,4 +126,9 @@ def train(agent, episodes=1000):
         if episode % 100 == 0:
             print(f"Episode {episode} - Score: {total_score}, Max tile: {max_tiles[-1]}, Epsilon: {agent.epsilon:.4f}")
 
+    # Save Q-table
+    with open(QTABLE_PATH, "wb") as file:
+        pickle.dump(agent.q_table, file)
+
     visualize_training(scores, max_tiles)
+
