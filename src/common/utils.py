@@ -27,20 +27,15 @@ def serialize_board(board):
     return tuple(cell for row in board for cell in row)
 
 def compute_reward(old_board, new_board):
+    reward = 0
     # The new board have to be different from the old one
-    if is_same_board(old_board, new_board):
-        return -5
-
+    for orow, nrow in zip(old_board, new_board):
+        for o, n in zip(orow, nrow):
+            if n > o:
+                reward += (n - o) + (n // 2)
     # The tile merging is encourage, especially high values
-    score_gain = sum(
-        sum(new_cell - old_cell for new_cell, old_cell in zip(new_row, old_row) if new_cell > old_cell)
-        for new_row, old_row in zip(new_board, old_board)
-    )
-
-    # Reducing the number of non-zero cells is encouraged
     empty_tiles = sum(cell == 0 for row in new_board for cell in row)
-
-    return score_gain + empty_tiles * 0.1
+    return reward + empty_tiles * 0.02 # or even 0.01
 
 # Keyboard
 def get_input():
@@ -94,7 +89,7 @@ def visualize_training(scores, max_tiles):
     plt.show()
 
 # AI
-def train(agent, episodes=1000):
+def train(agent, episodes=1000, log = False):
     scores = []
     max_tiles = []
 
@@ -123,7 +118,7 @@ def train(agent, episodes=1000):
         max_tiles.append(max(cell for row in game.board for cell in row))
         agent.decay_epsilon()
 
-        if episode % 100 == 0:
+        if log and episode % 100 == 0:
             print(f"Episode {episode} - Score: {total_score}, Max tile: {max_tiles[-1]}, Epsilon: {agent.epsilon:.4f}")
 
     # Save Q-table

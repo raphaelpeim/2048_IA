@@ -3,4 +3,4 @@ from src.common.utils import train
 
 if __name__ == "__main__":
     agent = QLearningAgent()
-    train(agent, episodes=100000)
+    train(agent, episodes=200000, log=True)
