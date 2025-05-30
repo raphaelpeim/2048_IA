@@ -83,7 +83,7 @@ class GameGUI:
 
         state = serialize_board(self.game.board)
         valid = get_valid_moves(self.game.board)
-        move = self.q_agent.get_action(state, valid)
+        move = self.q_agent.get_move(state, valid)
 
         original = [row[:] for row in self.game.board]
 

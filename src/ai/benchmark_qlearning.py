@@ -10,13 +10,13 @@ epsilons = [1.0]
 decays = [0.995, 0.999]
 min_epsilons = [0.05]
 
-param_combinations = list(itertools.product(alphas, gammas, epsilons, decays, min_epsilons))
+parameter_combinations = list(itertools.product(alphas, gammas, epsilons, decays, min_epsilons))
 
 def run_benchmark(games_per_combo=30):
     results = []
 
-    for i, (alpha, gamma, epsilon, decay, min_eps) in enumerate(param_combinations, 1):
-        print(f"[{i}/{len(param_combinations)}] Testing α={alpha}, γ={gamma}, ε={epsilon}, decay={decay}, min_ε={min_eps}")
+    for i, (alpha, gamma, epsilon, decay, min_eps) in enumerate(parameter_combinations, 1):
+        print(f"[{i}/{len(parameter_combinations)}] Testing α={alpha}, γ={gamma}, ε={epsilon}, decay={decay}, min_ε={min_eps}")
 
         agent = QLearningAgent(
             alpha=alpha,
